@@ -234,7 +234,7 @@ All endpoints are based at: `http://localhost:3000`
 
 ## Further Tips
 
-- Explore the API using Postman/Insomnia for a visual interface.
+- Explore the API using Thunderclient(VS code extension) or Postman/Insomnia for a visual interface.
 - Build a simple frontend or connect to a database for more advanced features.
 - Read the source code comments to understand each function's job.
 
