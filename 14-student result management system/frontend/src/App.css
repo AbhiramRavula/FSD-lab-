@@ -1,0 +1,22 @@
+/**
+ * App.css - Minimal Styling for Student Result Management App
+ * 
+ * This CSS file contains only the essential styles needed for the application.
+ * Designed to be simple, clean, and easy to understand.
+ * Uses black borders and basic spacing for a professional look.
+ */
+
+/* Basic body styling - sets font and margin */
+body { font-family: Arial; margin: 20px; }
+
+/* All div elements get black border and padding for clear sections */
+div { border: 1px solid black; padding: 15px; margin: 10px 0; }
+
+/* Form inputs and buttons get consistent styling */
+input, button { padding: 8px; margin: 5px; border: 1px solid black; }
+
+/* Table takes full width with collapsed borders */
+table { width: 100%; border-collapse: collapse; }
+
+/* Table cells get borders and padding for readability */
+th, td { border: 1px solid black; padding: 8px; }
