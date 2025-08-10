@@ -31,12 +31,26 @@ app.get("/products", (req, res) => {
     res.json(rows);
   });
 });
-
+ 
 // Add a new product (Create)
 app.post("/products", (req, res) => {
   const { name, quantity, price } = req.body;
-  if (!name || quantity == null || price == null)
-    return res.status(400).json({ error: "Name, quantity, and price required" });
+
+  const errors = [];
+  if (typeof name !== "string" || name.trim() === "") {
+    errors.push("Name must be a non-empty string.");
+  }
+  if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 0) {
+    errors.push("Quantity must be a non-negative integer.");
+  }
+  if (typeof price !== "number" || price < 0) {
+    errors.push("Price must be a non-negative number.");
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
   db.run(
     "INSERT INTO products (name, quantity, price) VALUES (?, ?, ?)",
     [name, quantity, price],
@@ -51,8 +65,22 @@ app.post("/products", (req, res) => {
 app.put("/products/:id", (req, res) => {
   const { id } = req.params;
   const { name, quantity, price } = req.body;
-  if (!name || quantity == null || price == null)
-    return res.status(400).json({ error: "Name, quantity, and price required" });
+
+  const errors = [];
+  if (typeof name !== "string" || name.trim() === "") {
+    errors.push("Name must be a non-empty string.");
+  }
+  if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 0) {
+    errors.push("Quantity must be a non-negative integer.");
+  }
+  if (typeof price !== "number" || price < 0) {
+    errors.push("Price must be a non-negative number.");
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
   db.run(
     "UPDATE products SET name = ?, quantity = ?, price = ? WHERE id = ?",
     [name, quantity, price, id],
