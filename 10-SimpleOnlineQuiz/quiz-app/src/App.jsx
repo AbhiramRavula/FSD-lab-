@@ -27,6 +27,11 @@ const questions = [
     options: ["2013", "2015", "2010", "2011"],
     answerIndex: 0,
   },
+  {
+    questionText: "What is Matrusri E&L?",
+    options: ["School", "Law", "Medical", "Arts"],
+    answerIndex: 0,
+  },
 ];
 
 function App() {
