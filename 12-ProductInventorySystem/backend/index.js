@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const initDB = require("./db");
 
 const PORT = process.env.PORT || 3000; // Generally 3000 only but this process.env.PORT is generally used for deployment purposes, you can ignore that
@@ -6,6 +7,9 @@ const PORT = process.env.PORT || 3000; // Generally 3000 only but this process.e
 async function startServer() {
   const db = await initDB();
   const app = express();
+
+  // Enable CORS for all origins (you can restrict this in production)
+  app.use(cors());
   app.use(express.json());
 
   // The above lines are for initialisation of the database!!
