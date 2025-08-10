@@ -79,12 +79,12 @@ function App() {
 
   // Render the main application UI
   return (
-    <div>
+    <div className="main-container">
       {/* Main application title */}
       <h1>Student Result Management App</h1>
       
       {/* Student Add/Edit Form Section */}
-      <div>
+      <div className="form-container">
         <h2>{editing ? 'Edit' : 'Add'} Student</h2>
         
         {/* Basic student information inputs */}
@@ -108,7 +108,7 @@ function App() {
 
       {/* Students List Table - Only shown when showStudents is true */}
       {showStudents && (
-        <div>
+        <div className="results-container">
           <h2>Students ({students.length})</h2>
           <table>
             {/* Table header */}
