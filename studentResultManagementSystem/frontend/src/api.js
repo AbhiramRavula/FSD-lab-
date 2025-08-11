@@ -1,65 +1,82 @@
 /**
- * API Module - Backend Communication Functions
- * 
- * This module contains all the functions needed to communicate with the backend API.
- * Handles all CRUD operations for the Student Result Management System.
- * 
- * Backend Server: http://localhost:5000
- * All functions return Promises that resolve to JSON data from the backend.
+ * api.js
+ * High-level, robust fetch helpers for the Student Result Management System.
+ * - Uses native fetch
+ * - Handles non-JSON responses and HTTP errors gracefully
+ * - All functions return a Promise that resolves to parsed JSON (or null for empty)
  */
 
-// Base URL for all API endpoints
-const API = 'http://localhost:5000/api'
+const BASE = "http://localhost:5000/api";
 
-/**
- * GET all students with their marks, grades, and calculated results
- * @returns {Promise<Array>} Array of student objects with complete information
- */
-export const getStudents = () => fetch(`${API}/students`).then(r => r.json())
+// parse and handle HTTP response
+async function handleResponse(res) {
+  if (!res.ok) {
+    // try to extract backend error message, fallback to status
+    const txt = await res.text().catch(() => "");
+    throw new Error(txt || `HTTP ${res.status}`);
+  }
+  // 204 No Content → return null
+  if (res.status === 204) return null;
+  // try parse JSON, if empty return null
+  const txt = await res.text().catch(() => "");
+  return txt ? JSON.parse(txt) : null;
+}
 
-/**
- * GET all available subjects from the backend
- * @returns {Promise<Array>} Array of subject names
- */
-export const getSubjects = () => fetch(`${API}/subjects`).then(r => r.json())
+/** GET /students -> [students] */
+export async function getStudents() {
+  const res = await fetch(`${BASE}/students`);
+  return handleResponse(res);
+}
 
-/**
- * POST - Create a new student with marks
- * @param {Object} data - Student data {name, roll_number, marks: [{subject, marks_obtained, max_marks}]}
- * @returns {Promise<Object>} Created student object with calculated grade
- */
-export const addStudent = (data) => fetch(`${API}/students`, {
-  method: 'POST', 
-  headers: {'Content-Type': 'application/json'}, 
-  body: JSON.stringify(data)
-})
-
-/**
- * PUT - Update existing student information and marks
- * @param {number} id - Student ID to update
- * @param {Object} data - Updated student data
- * @returns {Promise<Object>} Updated student object with recalculated grade
- */
-export const updateStudent = (id, data) => fetch(`${API}/students/${id}`, {
-  method: 'PUT', 
-  headers: {'Content-Type': 'application/json'}, 
-  body: JSON.stringify(data)
-})
+/** GET /subjects -> [subjects] */
+export async function getSubjects() {
+  const res = await fetch(`${BASE}/subjects`);
+  return handleResponse(res);
+}
 
 /**
- * DELETE - Remove a student from the system
- * @param {number} id - Student ID to delete
- * @returns {Promise<Object>} Success message from backend
+ * POST /students
+ * data: { name, roll_number, marks: [{ subject, marks_obtained, max_marks }] }
  */
-export const deleteStudent = (id) => fetch(`${API}/students/${id}`, {method: 'DELETE'})
+export async function addStudent(data) {
+  const res = await fetch(`${BASE}/students`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
 
-/*
- * Usage Examples:
- * import { getStudents, addStudent, updateStudent, deleteStudent, getSubjects } from './api'
- * 
- * // Get all students: const students = await getStudents()
- * // Add student: await addStudent({name: 'John', roll_number: '123', marks: [...]})
- * // Update student: await updateStudent(1, {name: 'John Updated'})
- * // Delete student: await deleteStudent(1)
- * // Get subjects: const subjects = await getSubjects()
+/**
+ * PUT /students/:id
+ * id: number or string
+ * data: same shape as addStudent
  */
+export async function updateStudent(id, data) {
+  const res = await fetch(`${BASE}/students/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return handleResponse(res);
+}
+
+/** DELETE /students/:id */
+export async function deleteStudent(id) {
+  const res = await fetch(`${BASE}/students/${id}`, { method: "DELETE" });
+  return handleResponse(res);
+}
+
+/**
+ * Optional: POST /subjects (if backend supports adding subjects)
+ * body: { name: 'New Subject' }
+ * If backend doesn't support it, this will throw / be ignored when used — UI falls back to reloading subjects.
+ */
+export async function addSubject(name) {
+  const res = await fetch(`${BASE}/subjects`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  return handleResponse(res);
+}

@@ -1,138 +1,249 @@
 /**
- * Student Result Management App - Main Component
- * 
- * This is the main React component that handles all student and result management.
- * Features:
- * - Add new students with marks for different subjects
- * - Edit existing student information and marks
- * - Delete students from the system
- * - View all students with calculated grades and percentages
- * - Dynamic subject loading from backend
- * 
- * Uses all 5 backend APIs for complete CRUD operations
+ * App.jsx
+ * High-level React frontend for Student Result Management System.
+ * - Simple hooks only: useState, useEffect
+ * - Clear inline comments to help beginners follow the flow
+ * - Uses api.js (fetch-based) for all backend calls
  */
 
-import { useState, useEffect } from 'react'
-import './App.css'
-import { getStudents, getSubjects, addStudent, updateStudent, deleteStudent as delStudent } from './api'
+import { useEffect, useState } from 'react';
+import './App.css';
+import {
+  getStudents,
+  getSubjects,
+  addStudent,
+  updateStudent,
+  deleteStudent,
+  addSubject
+} from './api';
 
-function App() {
-  // State variables for managing application data
-  const [students, setStudents] = useState([])        // Array of all students from backend
-  const [subjects, setSubjects] = useState([])        // Array of available subjects from backend
-  const [form, setForm] = useState({ name: '', roll_number: '', marks: {} })  // Form data for add/edit
-  const [editing, setEditing] = useState(null)        // ID of student being edited (null = add mode)
-  const [showStudents, setShowStudents] = useState(false)  // Toggle for showing/hiding student list
+export default function App() {
+  // application state
+  const [students, setStudents] = useState([]);     // all students from backend
+  const [subjects, setSubjects] = useState([]);     // available subjects
+  const [form, setForm] = useState({                // add/edit form state
+    name: '',
+    roll_number: '',
+    marks: {}           // object: { [subject]: value }
+  });
+  const [editing, setEditing] = useState(null);     // id when editing
+  const [showStudents, setShowStudents] = useState(false);
+  const [newSubject, setNewSubject] = useState(''); // for adding subject
+  const [loading, setLoading] = useState(false);    // simple loader flag
 
-  // Load initial data when component mounts
-  useEffect(() => {
-    getStudents().then(setStudents)    // Load all students from backend
-    getSubjects().then(setSubjects)    // Load all subjects from backend
-  }, [])
+  // load students & subjects on mount
+  useEffect(() => { loadAll(); }, []);
 
-  /**
-   * Save student data - handles both add and edit operations
-   * Converts form data to API format and sends to backend
-   */
-  const save = async () => {
-    // Convert form marks to API format (only non-zero marks)
-    const marks = subjects.map(s => ({ 
-      subject: s, 
-      marks_obtained: +form.marks[s] || 0, 
-      max_marks: 100 
-    })).filter(m => m.marks_obtained > 0)
-    
-    // Call appropriate API based on mode (edit vs add)
-    if (editing) {
-      await updateStudent(editing, { ...form, marks })  // Update existing student
-    } else {
-      await addStudent({ ...form, marks })              // Add new student
+  // load helper
+  async function loadAll() {
+    setLoading(true);
+    try {
+      const [s, sub] = await Promise.all([getStudents(), getSubjects()]);
+      setStudents(s || []);
+      setSubjects(sub || []);
+    } catch (err) {
+      alert('Failed to load data: ' + (err.message || err));
+    } finally {
+      setLoading(false);
     }
-    
-    // Reset form and refresh data
-    setForm({ name: '', roll_number: '', marks: {} })
-    setEditing(null)
-    getStudents().then(setStudents)  // Refresh student list
   }
 
-  /**
-   * Delete student from system
-   * @param {number} id - Student ID to delete
-   */
-  const deleteStudentHandler = async (id) => {
-    await delStudent(id)             // Call delete API
-    getStudents().then(setStudents)  // Refresh student list
+  // Convert form.marks + subjects list -> API marks array
+  function buildMarksArray() {
+    return subjects
+      .map(sub => ({
+        subject: sub,
+        marks_obtained: Number(form.marks?.[sub] || 0),
+        max_marks: 100
+      }))
+      // send only subjects where student has entered > 0 marks
+      .filter(m => m.marks_obtained > 0);
   }
 
-  /**
-   * Switch to edit mode for a specific student
-   * Populates form with existing student data
-   * @param {Object} s - Student object to edit
-   */
-  const edit = (s) => {
-    setEditing(s.id)  // Set editing mode
-    // Convert student marks to form format
-    const marks = {}
-    s.marks.forEach(m => marks[m.subject] = m.marks_obtained)
-    setForm({ name: s.name, roll_number: s.roll_number, marks })
+  // Save (create or update)
+  async function save() {
+    // basic validation
+    if (!form.name.trim()) return alert('Please enter student name.');
+    if (!form.roll_number.trim()) return alert('Please enter roll number.');
+
+    const marks = buildMarksArray();
+    if (marks.length === 0) {
+      // confirm, because student may want to save without marks
+      if (!confirm('No marks entered. Do you want to continue?')) return;
+    }
+
+    setLoading(true);
+    try {
+      if (editing) {
+        await updateStudent(editing, { ...form, marks });
+        setEditing(null);
+      } else {
+        await addStudent({ ...form, marks });
+      }
+      setForm({ name: '', roll_number: '', marks: {} });
+      await loadAll();
+      setShowStudents(true);
+    } catch (err) {
+      alert('Save failed: ' + (err.message || err));
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // Render the main application UI
+  // populate form for editing
+  function startEdit(student) {
+    setEditing(student.id);
+    const marksObj = {};
+    (student.marks || []).forEach(m => (marksObj[m.subject] = m.marks_obtained));
+    setForm({ name: student.name, roll_number: student.roll_number, marks: marksObj });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // delete student
+  async function removeStudent(id) {
+    if (!confirm('Are you sure you want to delete this student?')) return;
+    setLoading(true);
+    try {
+      await deleteStudent(id);
+      await loadAll();
+    } catch (err) {
+      alert('Delete failed: ' + (err.message || err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Add a new subject (calls backend if supported; otherwise reloads)
+  async function handleAddSubject() {
+    const name = newSubject.trim();
+    if (!name) return;
+    setLoading(true);
+    try {
+      await addSubject(name).catch(() => { }); // tolerate backend not supporting POST /subjects
+      setNewSubject('');
+      await loadAll();
+    } catch (err) {
+      alert('Adding subject failed: ' + (err.message || err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Compute totals locally if backend didn't precompute
+  function computeTotals(student) {
+    if (student.total_obtained != null && student.total_max != null && student.percentage != null) {
+      return {
+        obtained: student.total_obtained,
+        max: student.total_max,
+        percentage: student.percentage,
+        grade: student.grade
+      };
+    }
+    const m = student.marks || [];
+    const obtained = m.reduce((acc, it) => acc + Number(it.marks_obtained || 0), 0);
+    const max = m.reduce((acc, it) => acc + Number(it.max_marks || 100), 0) || (subjects.length * 100);
+    const percentage = max ? Math.round((obtained / max) * 100) : 0;
+    const grade = percentage >= 90 ? 'A' : percentage >= 80 ? 'B' : percentage >= 70 ? 'C' : percentage >= 60 ? 'D' : 'F';
+    return { obtained, max, percentage, grade };
+  }
+
+  // tiny helper to update form marks value
+  function setMark(subject, val) {
+    setForm(f => ({ ...f, marks: { ...(f.marks || {}), [subject]: val } }));
+  }
+
   return (
-    <div>
-      {/* Main application title */}
-      <h1>Student Result Management App</h1>
-      
-      {/* Student Add/Edit Form Section */}
-      <div>
-        <h2>{editing ? 'Edit' : 'Add'} Student</h2>
-        
-        {/* Basic student information inputs */}
-        <input placeholder="Name" value={form.name} 
-          onChange={e => setForm({...form, name: e.target.value})} />
-        <input placeholder="Roll Number" value={form.roll_number} 
-          onChange={e => setForm({...form, roll_number: e.target.value})} />
-        
-        {/* Dynamic subject mark inputs - generated from backend subjects */}
-        {subjects.map(subject => (
-          <input key={subject} type="number" placeholder={subject} 
-            value={form.marks[subject] || ''} 
-            onChange={e => setForm({...form, marks: {...form.marks, [subject]: e.target.value}})} />
-        ))}
-        
-        {/* Action buttons */}
-        <button onClick={save}>{editing ? 'Update' : 'Add'}</button>
-        {editing && <button onClick={() => {setEditing(null); setForm({ name: '', roll_number: '', marks: {} })}}>Cancel</button>}
-        <button onClick={() => setShowStudents(!showStudents)}>{showStudents ? 'Hide Students' : 'View All Students'}</button>
+    <div className="container">
+      <h1>Student Result Management</h1>
+
+      <div className="form-box">
+        <h2>{editing ? 'Edit Student' : 'Add Student'}</h2>
+
+        <input
+          placeholder="Student name"
+          value={form.name}
+          onChange={e => setForm({ ...form, name: e.target.value })}
+        />
+        <input
+          placeholder="Roll number"
+          value={form.roll_number}
+          onChange={e => setForm({ ...form, roll_number: e.target.value })}
+        />
+
+        <div className="subjects-row">
+          {subjects.map(sub => (
+            <input
+              key={sub}
+              type="number"
+              min="0"
+              max="100"
+              placeholder={`${sub} marks`}
+              value={form.marks?.[sub] ?? ''}
+              onChange={e => setMark(sub, e.target.value)}
+            />
+          ))}
+        </div>
+
+        <div className="subject-add">
+          <input
+            placeholder="Add new subject"
+            value={newSubject}
+            onChange={e => setNewSubject(e.target.value)}
+          />
+          <button className="small" onClick={handleAddSubject}>Add Subject</button>
+        </div>
+
+        <div className="actions">
+          <button onClick={save} disabled={loading}>{editing ? 'Update' : 'Add'}</button>
+          {editing && <button className="secondary" onClick={() => { setEditing(null); setForm({ name: '', roll_number: '', marks: {} }); }}>Cancel</button>}
+          <button className="secondary" onClick={() => setShowStudents(s => !s)}>{showStudents ? 'Hide Students' : 'View Students'}</button>
+        </div>
       </div>
 
-      {/* Students List Table - Only shown when showStudents is true */}
       {showStudents && (
         <div>
           <h2>Students ({students.length})</h2>
-          <table>
-            {/* Table header */}
-            <tr><th>Roll</th><th>Name</th><th>Marks</th><th>Total</th><th>%</th><th>Grade</th><th>Actions</th></tr>
-            {/* Student data rows - each student from backend with calculated results */}
-            {students.map(s => (
-              <tr key={s.id}>
-                <td>{s.roll_number}</td>
-                <td>{s.name}</td>
-                <td>{s.marks.map(m => <div key={m.subject}>{m.subject}: {m.marks_obtained}</div>)}</td>
-                <td>{s.total_obtained}/{s.total_max}</td>
-                <td>{s.percentage}%</td>
-                <td>{s.grade}</td>
-                <td>
-                  <button onClick={() => edit(s)}>Edit</button>
-                  <button onClick={() => deleteStudentHandler(s.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </table>
+          {students.length === 0 ? <p>No students found. Add one above.</p> : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll</th>
+                  <th>Name</th>
+                  <th>Marks</th>
+                  <th>Total</th>
+                  <th>%</th>
+                  <th>Grade</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map(s => {
+                  const t = computeTotals(s);
+                  return (
+                    <tr key={s.id}>
+                      <td>{s.roll_number}</td>
+                      <td>{s.name}</td>
+                      <td>
+                        {(s.marks || []).map(m => <div key={m.subject}>{m.subject}: {m.marks_obtained}</div>)}
+                      </td>
+                      <td>{t.obtained}/{t.max}</td>
+                      <td>{t.percentage}%</td>
+                      <td>{s.grade || t.grade}</td>
+                      <td>
+                        <button className="warn" onClick={() => startEdit(s)}>Edit</button>
+                        <button className="danger" onClick={() => removeStudent(s.id)}>Delete</button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
-    </div>
-  )
-}
 
-export default App
+      {/* small loading indicator */}
+      {loading && <div className="loading">Loading…</div>}
+    </div>
+  );
+}
