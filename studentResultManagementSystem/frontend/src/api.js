@@ -6,19 +6,19 @@
  * - All functions return a Promise that resolves to parsed JSON (or null for empty)
  */
 
-const BASE = "http://localhost:5000/api";
+const BASE = 'http://localhost:5000/api';
 
 // parse and handle HTTP response
 async function handleResponse(res) {
   if (!res.ok) {
     // try to extract backend error message, fallback to status
-    const txt = await res.text().catch(() => "");
+    const txt = await res.text().catch(() => '');
     throw new Error(txt || `HTTP ${res.status}`);
   }
   // 204 No Content → return null
   if (res.status === 204) return null;
   // try parse JSON, if empty return null
-  const txt = await res.text().catch(() => "");
+  const txt = await res.text().catch(() => '');
   return txt ? JSON.parse(txt) : null;
 }
 
@@ -40,9 +40,9 @@ export async function getSubjects() {
  */
 export async function addStudent(data) {
   const res = await fetch(`${BASE}/students`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
   });
   return handleResponse(res);
 }
@@ -54,16 +54,16 @@ export async function addStudent(data) {
  */
 export async function updateStudent(id, data) {
   const res = await fetch(`${BASE}/students/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
   });
   return handleResponse(res);
 }
 
 /** DELETE /students/:id */
 export async function deleteStudent(id) {
-  const res = await fetch(`${BASE}/students/${id}`, { method: "DELETE" });
+  const res = await fetch(`${BASE}/students/${id}`, { method: 'DELETE' });
   return handleResponse(res);
 }
 
@@ -74,9 +74,9 @@ export async function deleteStudent(id) {
  */
 export async function addSubject(name) {
   const res = await fetch(`${BASE}/subjects`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
   });
   return handleResponse(res);
 }

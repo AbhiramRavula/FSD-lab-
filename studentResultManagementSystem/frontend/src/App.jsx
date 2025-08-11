@@ -119,7 +119,7 @@ export default function App() {
     if (!name) return;
     setLoading(true);
     try {
-      await addSubject(name).catch(() => { }); // tolerate backend not supporting POST /subjects
+      await addSubject(name).catch(() => {}); // tolerate backend not supporting POST /subjects
       setNewSubject('');
       await loadAll();
     } catch (err) {
