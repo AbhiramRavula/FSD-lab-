@@ -1,0 +1,101 @@
+/* Minimal Blue & White Student Management CSS - Under 30 lines */
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f4ff;
+  padding: 20px;
+  color: #333;
+}
+h1, h2 {
+  color: #1e40af;
+  text-align: center;
+  margin-bottom: 15px;
+}
+.main-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.form-container, .results-container {
+  background: white;
+  padding: 20px;
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.1);
+}
+input {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  margin: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+}
+
+th {
+  background: #1e40af;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #333;
+}
+tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+
+
+td div {
+  background: #eff6ff;
+  padding: 6px 10px;
+  margin: 2px;
+  border-radius: 4px;
+  display: inline-block;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+td button {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+td button:first-of-type {
+  background: #10b981;
+}
+
+td button:first-of-type:hover {
+  background: #059669;
+}
+
+td button:last-of-type {
+  background: #ef4444;
+}
+
+
