@@ -1,8 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 const initDB = require("./db");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
+
+// Enable CORS for frontend communication
+app.use(cors());
 app.use(express.json());
 
 let db;

@@ -1,49 +1,63 @@
-# Product Inventory System - Frontend
+# Product Inventory System Frontend (Vite Version)
 
-This is a React-based frontend for the Product Inventory Management System. It provides a modern, responsive UI for managing products with full CRUD operations.
+A simple and clean Product Inventory Management System built with Vite, React, and CSS.
 
 ## Features
 
-- ✅ **Add Products**: Create new products with name, quantity, price, and description
-- ✅ **View Products**: Display all products in a responsive grid layout
-- ✅ **Edit Products**: Update existing product information via modal
-- ✅ **Delete Products**: Remove products with confirmation
-- ✅ **Real-time Updates**: Automatic refresh after operations
-- ✅ **Error Handling**: User-friendly error messages
-- ✅ **Responsive Design**: Works on desktop, tablet, and mobile
-- ✅ **Modern UI**: Clean design with animations and gradients
+- ➕ Add new products
+- 📦 View all products in a responsive grid
+- ✏️ Edit existing products
+- 🗑️ Delete products
+- 🔄 Refresh product list
+- 📱 Mobile-responsive design
+- 🎨 Clean and attractive UI with gradients and animations
 
-## Tech Stack
+## Technology Stack
 
-- **React** (with JavaScript)
-- **Axios** for HTTP requests
-- **CSS3** with modern styling
-- **Responsive Grid Layout**
+- **Vite** - Fast build tool and development server
+- **React** - JavaScript library for building user interfaces
+- **Axios** - HTTP client for API requests
+- **CSS** - Pure CSS for styling (no frameworks)
 
 ## Prerequisites
 
-Make sure you have:
-- Node.js installed
-- The backend server running on `http://localhost:3000`
+- Node.js (v14 or higher)
+- Backend server running on `http://localhost:3000`
 
-## Running the Application
+## Installation & Setup
 
-### Start the Backend (Required First!)
-```bash
-# Navigate to the parent directory
-cd ..
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-# Start the backend server
-npm start
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+3. Open your browser and navigate to `http://localhost:5173`
+
+## API Endpoints
+
+The application connects to the following backend endpoints:
+- `GET /products` - Fetch all products
+- `POST /products` - Add a new product
+- `PUT /products/:id` - Update a product
+- `DELETE /products/:id` - Delete a product
+
+## Project Structure
+
 ```
-The backend will run on `http://localhost:3000`
-
-### Start the Frontend
-```bash
-# In this directory (frontend)
-npm start
+frontend2/
+├── src/
+│   ├── App.jsx      # Main application component
+│   ├── App.css      # Application styles
+│   ├── index.css    # Base styles
+│   └── main.jsx     # Application entry point
+├── package.json     # Dependencies and scripts
+└── README.md        # This file
 ```
-The React app will run on `http://localhost:3001` (or next available port)
 
 ## Usage
 
@@ -51,39 +65,26 @@ The React app will run on `http://localhost:3001` (or next available port)
 2. **Viewing Products**: All products are displayed in cards below the form
 3. **Editing Products**: Click the "Edit" button on any product card
 4. **Deleting Products**: Click the "Delete" button and confirm the action
-5. **Refreshing**: Use the "Refresh" button to reload products
+5. **Refreshing**: Click the "Refresh" button to reload products from the server
 
-## API Integration
+## Styling Features
 
-The frontend communicates with the backend API at `http://localhost:3000`:
+- Modern gradient background
+- Glass morphism effect on cards
+- Smooth animations and hover effects
+- Responsive grid layout
+- Mobile-first design approach
+- Clean typography and spacing
 
-- `GET /products` - Fetch all products
-- `POST /products` - Create a new product
-- `PUT /products/:id` - Update a product
-- `DELETE /products/:id` - Delete a product
+## Development
 
-## Available Scripts
+This project was created for educational purposes as a simple lab exercise focusing on:
+- Basic CRUD operations
+- API integration with Axios
+- Component state management
+- Form handling
+- CSS styling without frameworks
 
-### `npm start`
-Runs the app in development mode. Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
+## Expanding the ESLint configuration
 
-### `npm run build`
-Builds the app for production to the `build` folder.
-
-### `npm test`
-Launches the test runner in interactive watch mode.
-
-## Troubleshooting
-
-1. **CORS Errors**: Make sure the backend has CORS enabled (already configured)
-2. **Connection Refused**: Ensure the backend is running on port 3000
-3. **Port Issues**: React dev server will automatically use next available port
-4. **Axios Errors**: Check browser console for detailed error messages
-
-## Development Notes
-
-- The app uses plain JavaScript React (no TypeScript)
-- All forms have validation and error handling
-- Success and error messages auto-dismiss after a few seconds
-- The UI is fully responsive and works on all device sizes
-- Animations and hover effects enhance user experience
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
